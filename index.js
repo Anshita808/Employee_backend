@@ -13,6 +13,10 @@ app.use(express.json());
 app.use("/auth", employRoute);
 app.use("/manager", manaerRoute);
 
+app.get("/",async(req,res)=>{
+  res.json("hello")
+})
+
 app.listen(8080, async () => {
   try {
     await connection;
