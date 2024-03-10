@@ -107,23 +107,22 @@ const filterEmployees = async (req, res) => {
       query.location = location;
     }
 
-    // Build sorting options
-    let sortOption = {};
-    if (sort) {
-      if (sort === "asc") {
-        sortOption.name = 1; // Ascending order
-      } else if (sort === "desc") {
-        sortOption.name = -1; // Descending order
-      }
+    // Find employees based on query
+    let employees = await EmployModel.find(query).populate("department"); // Populate department field
+
+    // Sort employees based on the provided sort parameter
+    if (sort === "asc") {
+      employees = employees.sort((a, b) => (a.name > b.name ? 1 : -1));
+    } else if (sort === "desc") {
+      employees = employees.sort((a, b) => (a.name < b.name ? 1 : -1));
     }
 
-    // Find employees based on query and sort options
-    const employees = await EmployModel.find(query).sort(sortOption);
-
-    if (employees.length === 0) {
-      return res
-        .status(404)
-        .send({ msg: "No employees found matching the criteria" });
+    // Filter by name if provided
+    const { name } = req.query;
+    if (name) {
+      employees = employees.filter((employee) =>
+        employee.name.toLowerCase().includes(name.toLowerCase())
+      );
     }
 
     res.status(200).send({ msg: "Filtered employees", employees });
